@@ -51,3 +51,12 @@ A working MVP of the frontend has been built and is already in frontend. This is
 
 All documents for planning and executing this project will be in the docs/ directory.
 Please review the docs/PLAN.md document before proceeding.
+
+## Scaffolding status
+
+- FastAPI backend initialized at `backend/main.py` with a sample `/api/hello` route.
+- Static file serving configured and tested with a `hello.html` in `backend/static`.
+- Frontend Next.js project now builds during Docker image creation; output is copied into `backend/static` and served at `/` with assets under `/static`.
+- Dockerfile created at project root; the container builds and runs, exposing port 8000.
+- Platform-appropriate start/stop scripts exist under `scripts/` and have been validated on macOS.
+- Basic backend tests added and passing.
