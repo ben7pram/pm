@@ -1,5 +1,9 @@
 from fastapi.testclient import TestClient
 from backend import main
+from backend.database import init_db
+
+# Initialize database before running tests
+init_db()
 
 client = TestClient(main.app)
 
@@ -46,6 +50,54 @@ def test_root_static():
     resp = client.get("/")
     assert resp.status_code == 200
     assert "<h1>" in resp.text
+
+
+def test_board_endpoints():
+    """Test /api/board GET and POST endpoints."""
+    from fastapi.testclient import TestClient
+    test_client = TestClient(main.app)
+    
+    # Unauthenticated GET should fail
+    resp = test_client.get("/api/board")
+    assert resp.status_code == 401
+
+    # Log in
+    login_resp = test_client.post(
+        "/api/login", json={"username": "user", "password": "password"}
+    )
+    assert login_resp.status_code == 200
+    session_cookie = login_resp.cookies.get("session")
+    assert session_cookie is not None
+
+    # Authenticated GET should return the board
+    resp = test_client.get("/api/board")
+    assert resp.status_code == 200
+    board_data = resp.json()
+    assert "board" in board_data
+    board = board_data["board"]
+    assert "id" in board
+    assert "user_id" in board
+    assert "title" in board
+    assert "data" in board
+    assert "columns" in board["data"]
+    assert "cards" in board["data"]
+    assert len(board["data"]["columns"]) == 5
+
+    # Update the board (POST)
+    new_board_data = board["data"].copy()
+    new_board_data["columns"][0]["title"] = "Updated Backlog"
+
+    update_resp = test_client.post(
+        "/api/board", json={"data": new_board_data}
+    )
+    assert update_resp.status_code == 200
+    updated = update_resp.json()["board"]
+    assert updated["data"]["columns"][0]["title"] == "Updated Backlog"
+    assert "updated_at" in updated
+
+    # Missing data field should fail
+    resp = test_client.post("/api/board", json={})
+    assert resp.status_code == 400
 
 
 def test_serving_exported_site(tmp_path):

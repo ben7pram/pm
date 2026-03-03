@@ -10,13 +10,8 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        // ensure all HTTP methods are proxied to backend (GET worked already,
-        // POST was returning 404 in tests)
+        // during development we proxy all API requests to the backend server
         destination: "http://localhost:8000/api/:path*",
-        // the `methods` field is supported in Next.js rewrites and defaults to
-        // all methods, but being explicit here guards against unexpected
-        // limitations in development mode.
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       },
     ];
   },

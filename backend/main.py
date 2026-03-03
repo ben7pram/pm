@@ -3,6 +3,8 @@ from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
 from typing import Optional
+from .database import init_db, get_user_by_username, get_board_for_user, update_board_for_user
+from .openrouter import call_openrouter
 
 
 def create_app(static_dir: Optional[str] = None) -> FastAPI:
@@ -12,6 +14,11 @@ def create_app(static_dir: Optional[str] = None) -> FastAPI:
     `backend/static` directory is used.
     """
     app = FastAPI()
+
+    # initialize database on startup
+    @app.on_event("startup")
+    def startup():
+        init_db()
 
     # determine static directory
     if static_dir is None:
@@ -25,17 +32,17 @@ def create_app(static_dir: Optional[str] = None) -> FastAPI:
     # simple auth endpoints for fake user sign-in
     @app.post("/api/login")
     def login(credentials: dict, response: Response):
-        # log for debugging to confirm backend saw the request
-        print("backend received login", credentials)
-        # credentials expected to have `username` and `password` keys
-        if (
-            credentials.get("username") == "user"
-            and credentials.get("password") == "password"
-        ):
-            # set a trivial session cookie
+        # validate credentials against database
+        username = credentials.get("username")
+        password = credentials.get("password")
+        user = get_user_by_username(username)
+        
+        # MVP: plain-text password comparison
+        if user and password == "password":
+            # set session cookie with user id for later board access
             response.set_cookie(
                 key="session",
-                value="1",
+                value=f"user_{user['id']}",
                 httponly=True,
                 samesite="lax",
             )
@@ -49,7 +56,40 @@ def create_app(static_dir: Optional[str] = None) -> FastAPI:
 
     @app.get("/api/me")
     def me(session: Optional[str] = Cookie(None)):
-        return {"authenticated": session == "1"}
+        # session value is now user_{id}; validate it exists
+        if session and session.startswith("user_"):
+            return {"authenticated": True}
+        return {"authenticated": False}
+
+    @app.get("/api/board")
+    def get_board(session: Optional[str] = Cookie(None)):
+        """Retrieve the kanban board for the authenticated user."""
+        if not session or not session.startswith("user_"):
+            return JSONResponse(status_code=401, content={"error": "Not authenticated"})
+        
+        user_id = int(session.split("_")[1])
+        board = get_board_for_user(user_id)
+        if not board:
+            return JSONResponse(status_code=404, content={"error": "Board not found"})
+        return {"board": board}
+
+    @app.post("/api/board")
+    def update_board(body: dict, session: Optional[str] = Cookie(None)):
+        """Update the kanban board for the authenticated user."""
+        if not session or not session.startswith("user_"):
+            return JSONResponse(status_code=401, content={"error": "Not authenticated"})
+        
+        user_id = int(session.split("_")[1])
+        board_data = body.get("data")
+        if not board_data:
+            return JSONResponse(status_code=400, content={"error": "Missing board data"})
+        
+        success = update_board_for_user(user_id, board_data)
+        if not success:
+            return JSONResponse(status_code=404, content={"error": "Board not found"})
+        
+        updated_board = get_board_for_user(user_id)
+        return {"board": updated_board}
 
     @app.get("/", response_class=HTMLResponse)
     def root():

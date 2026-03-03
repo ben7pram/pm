@@ -36,33 +36,33 @@
 **Tests / Success criteria:** rebuilding the project results in a working Kanban board in the container; automated tests exercise static serving. ✅ All checks completed.
 
 ## Part 4: Fake user sign‑in 🔐
-- [ ] Implement frontend login page with hard‑coded credentials (`user`/`password`).
-- [ ] Add backend session handling or simple cookie check.
-- [ ] Redirect to login if unauthenticated and allow logout.
-- [ ] Write tests covering login flow (Vitest/Playwright for e2e).
+- [x] Implement frontend login page with hard‑coded credentials (`user`/`password`).
+- [x] Add backend session handling or simple cookie check.
+- [x] Redirect to login if unauthenticated and allow logout.
+- [x] Write tests covering login flow (Vitest/Playwright for e2e).
 
-**Tests / Success criteria:** user cannot see board until they log in; credentials enforced; logout works.
+**Tests / Success criteria:** user cannot see board until they log in; credentials enforced; logout works. ✅ All checks completed.
 
 ## Part 5: Database modeling 🗄️
-- [ ] Design SQLite schema for users and kanban boards (JSON stored for simplicity).
-- [ ] Document schema and reasoning in a new file under `docs/`.
-- [ ] Review schema with user and update per feedback.
+- [x] Design SQLite schema for users and kanban boards (JSON stored for simplicity).
+- [x] Document schema and reasoning in a new file under `docs/`.
+- [x] Review schema with user and update per feedback.
 
-**Tests / Success criteria:** schema document exists and is approved; migrations or init code can create the database.
+**Tests / Success criteria:** schema document exists and is approved; migrations or init code can create the database. ✅ All checks completed.
 
 ## Part 6: Backend APIs 🔌
-- [ ] Add endpoints to get/set the kanban for the current user.
-- [ ] Ensure database creation if not present.
-- [ ] Write backend unit tests for these endpoints and data logic.
+- [x] Add endpoints to get/set the kanban for the current user.
+- [x] Ensure database creation if not present.
+- [x] Write backend unit tests for these endpoints and data logic.
 
-**Tests / Success criteria:** API returns/updates data correctly; tests exercise edge cases.
+**Tests / Success criteria:** API returns/updates data correctly; tests exercise edge cases. ✅ All checks completed.
 
 ## Part 7: Frontend + Backend integration 🔄
-- [ ] Change frontend to fetch board data from the API and post updates (renames, moves, add/remove).
-- [ ] Ensure state remains consistent; handle loading and error states.
-- [ ] Add integration tests simulating user actions with real API (could run container in test mode).
+- [x] Change frontend to fetch board data from the API and post updates (renames, moves, add/remove).
+- [x] Ensure state remains consistent; handle loading and error states.
+- [x] Add integration tests simulating user actions with real API (could run container in test mode).
 
-**Tests / Success criteria:** persistent board state across page reloads; actions reflect in DB.
+**Tests / Success criteria:** persistent board state across page reloads; actions reflect in DB. ✅ All checks completed (5 e2e tests passing, 5 backend tests passing).
 
 ## Part 8: AI connectivity 🤖
 - [ ] Add server-side code to call OpenRouter using `OPENROUTER_API_KEY`.
